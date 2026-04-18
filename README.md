@@ -67,7 +67,7 @@ The system utilizes **Willpower (Alpha)** as a learnable parameter.
 
 ## 🛠️ Implementation (Python/PyTorch)
 ```python
-# RAI Model Architecture by Tamer Pınar
+ 1j * imag) * torch.exp(1j * phase)# RAI Model Architecture by Tamer Pınar
 import torch
 import torch.nn as nn
 
@@ -106,7 +106,7 @@ class RAI(nn.Module):
         # 2. Complex Resonance (R = 1 + 0 + i)
         # Applying pi/4 phase locking to minimize entropy
         phase = torch.tensor(torch.pi / 4)
-        resonance = (real + 1j * imag) * torch.exp(1j * phase)
+        resonance = (real +
         
         # 3. Apply Willpower (Alpha) as a modulation factor
         # Transforming randomness into meaningful data
@@ -115,3 +115,79 @@ class RAI(nn.Module):
         return self.output(F.relu(synthesis))
 
 # Tamer Pinar Zero Point - R-Sentez Verification
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+
+class RAIVInfinityODE(nn.Module):
+    """
+    RAI Sentez V∞ - Continuous Field Transformer (ODE-style)
+    """
+
+    def __init__(self, hidden_channels=1, noise_std=0.01):
+        super().__init__()
+
+        self.diff_w = nn.Parameter(torch.tensor(0.1))
+        self.nonlin_w = nn.Parameter(torch.tensor(0.2))
+        self.attn_w = nn.Parameter(torch.tensor(0.1))
+
+        self.noise_std = noise_std
+
+        # projection for attention
+        self.to_q = nn.Conv2d(hidden_channels, hidden_channels, 1)
+        self.to_k = nn.Conv2d(hidden_channels, hidden_channels, 1)
+        self.to_v = nn.Conv2d(hidden_channels, hidden_channels, 1)
+
+    def laplacian(self, x):
+        return (
+            -4 * x
+            + torch.roll(x, 1, dims=2)
+            + torch.roll(x, -1, dims=2)
+            + torch.roll(x, 1, dims=3)
+            + torch.roll(x, -1, dims=3)
+        )
+
+    def attention(self, x):
+        B, C, H, W = x.shape
+
+        q = self.to_q(x)
+        k = self.to_k(x)
+        v = self.to_v(x)
+
+        # flatten spatial dims
+        q = q.view(B, C, -1)
+        k = k.view(B, C, -1)
+        v = v.view(B, C, -1)
+
+        attn = torch.softmax(torch.bmm(q.transpose(1, 2), k), dim=-1)
+        out = torch.bmm(v, attn.transpose(1, 2))
+
+        out = out.view(B, C, H, W)
+        return out
+
+    def forward(self, x, dt=0.1):
+
+        # field dynamics
+        diffusion = self.laplacian(x)
+        nonlinear = torch.tanh(x)
+
+        # global interaction
+        attn = self.attention(x)
+
+        noise = torch.randn_like(x) * self.noise_std
+
+        # continuous-time update (ODE style)
+        dx = (
+            self.diff_w * diffusion +
+            self.nonlin_w * nonlinear +
+            self.attn_w * attn +
+            noise
+        )
+
+        x = x + dt * dx
+
+        # stability normalization
+        x = x / (1 + torch.abs(x))
+
+        return x

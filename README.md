@@ -191,3 +191,171 @@ class RAIVInfinityODE(nn.Module):
         x = x / (1 + torch.abs(x))
 
         return x
+import os
+import torch
+import torch.nn as nn
+
+
+# =========================
+# CONFIG
+# =========================
+class Config:
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    distributed = os.getenv("WORLD_SIZE") is not None
+    steps = 3
+    mode = os.getenv("RAI_MODE", "train")  # train | infer | test
+
+
+# =========================
+# SAFE CUDA IMPORT
+# =========================
+try:
+    import rai_cuda
+    CUDA_AVAILABLE = True
+except:
+    CUDA_AVAILABLE = False
+
+
+# =========================
+# CORE PHYSICS MODEL (FALLBACK)
+# =========================
+class PhysicsFallback(nn.Module):
+    def __init__(self, ch=16):
+        super().__init__()
+        self.conv = nn.Conv2d(ch, ch, 3, padding=1)
+
+    def forward(self, x):
+        lap = (
+            -4 * x
+            + torch.roll(x, 1, 2)
+            + torch.roll(x, -1, 2)
+            + torch.roll(x, 1, 3)
+            + torch.roll(x, -1, 3)
+        )
+        return x + self.conv(x) + 0.1 * lap
+
+
+# =========================
+# OPTIONAL CUDA KERNEL WRAPPER
+# =========================
+class PhysicsCUDAWrapper(nn.Module):
+    def forward(self, x):
+        return rai_cuda.laplacian(x)
+
+
+# =========================
+# MEMORY + ODE CORE
+# =========================
+class CoreEngine(nn.Module):
+    def __init__(self, ch=16):
+        super().__init__()
+
+        self.physics = PhysicsCUDAWrapper() if CUDA_AVAILABLE else PhysicsFallback(ch)
+
+        self.memory = nn.MultiheadAttention(ch, 4, batch_first=True)
+        self.ode = nn.Sequential(
+            nn.Conv2d(ch, ch, 1),
+            nn.Tanh()
+        )
+
+    def forward(self, x, steps=3):
+
+        for _ in range(steps):
+
+            # physics step
+            x = self.physics(x)
+
+            # memory (flatten)
+            B, C, H, W = x.shape
+            seq = x.view(B, C, H * W).transpose(1, 2)
+            seq, _ = self.memory(seq, seq, seq)
+            x = seq.transpose(1, 2).view(B, C, H, W)
+
+            # ODE step
+            x = x + 0.1 * self.ode(x)
+
+        return x
+
+
+# =========================
+# MULTI-GPU SYNC (OPTIONAL)
+# =========================
+def sync_if_needed(x):
+    if Config.distributed:
+        import torch.distributed as dist
+        dist.all_reduce(x, op=dist.ReduceOp.SUM)
+        x /= dist.get_world_size()
+    return x
+
+
+# =========================
+# TRAIN LOOP
+# =========================
+def train(model):
+    opt = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+    for step in range(50):
+
+        x = torch.randn(4, 16, 64, 64, device=Config.device)
+        target = torch.randn_like(x)
+
+        pred = model(x)
+        loss = ((pred - target) ** 2).mean()
+
+        opt.zero_grad()
+        loss.backward()
+        opt.step()
+
+        print(f"[TRAIN] step={step} loss={loss.item():.4f}")
+
+
+# =========================
+# INFERENCE
+# =========================
+def infer(model):
+    x = torch.randn(1, 16, 64, 64, device=Config.device)
+
+    with torch.no_grad():
+        y = model(x)
+
+    print("[INFER] output mean:", y.mean().item())
+
+
+# =========================
+# TEST MODE (CI/CD HOOK)
+# =========================
+def test(model):
+    x = torch.randn(2, 16, 32, 32, device=Config.device)
+    y = model(x)
+
+    assert y.shape == x.shape
+    print("[TEST] PASS")
+
+
+# =========================
+# MAIN ENTRYPOINT
+# =========================
+def main():
+
+    print("RAI Runtime Starting...")
+    print("Device:", Config.device)
+    print("CUDA Kernel:", CUDA_AVAILABLE)
+    print("Distributed:", Config.distributed)
+
+    model = CoreEngine().to(Config.device)
+
+    if Config.mode == "train":
+        train(model)
+
+    elif Config.mode == "infer":
+        infer(model)
+
+    elif Config.mode == "test":
+        test(model)
+
+    else:
+        raise ValueError("Unknown mode")
+
+
+if __name__ == "__main__":
+    main()

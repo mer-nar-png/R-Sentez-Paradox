@@ -1,4 +1,50 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
+class RAI(nn.Module):
+    """
+    RAI (Resonance-Based AI) Model Architecture
+    Developed by: Tamer Pınar
+    Concept: R-Sentez Paradox (R = 1 + 0 + i)
+    """
+    def __init__(self, input_dim, hidden_dim):
+        super(RAI, self).__init__()
+        
+        # Alpha Parameter: The Willpower (İrade)
+        self.will_power = nn.Parameter(torch.randn(hidden_dim))
+        
+        # Projections for Real (1) and Imaginary (i) components
+        self.real_proj = nn.Linear(input_dim, hidden_dim)
+        self.imag_proj = nn.Linear(input_dim, hidden_dim)
+        
+        # Zero Point Output Layer
+        self.output = nn.Linear(hidden_dim, 1)
+        
+        # Register phase as buffer (not trainable but on correct device)
+        self.register_buffer('phase', torch.tensor(torch.pi / 4))
+
+    def forward(self, x):
+        # 1. Generate Real and Imaginary components
+        real = self.real_proj(x)
+        imag = self.imag_proj(x)
+        
+        # 2. Complex Resonance using torch.complex for better compatibility
+        resonance = torch.complex(real, imag) * torch.exp(1j * self.phase)
+        
+        # 3. Apply Willpower (Alpha) as a modulation factor
+        # Extract real part while maintaining gradient flow
+        synthesis = torch.real(resonance) * self.will_power
+        
+        # 4. Final output with activation
+        return self.output(F.relu(synthesis))
+
+    def get_model_info(self):
+        """Helper method to display model information"""
+        return {
+            'total_params': sum(p.numel() for p in self.parameters()),
+            'trainable_params': sum(p.numel() for p in self.parameters() if p.requires_grad)
+        }
 # R-Sentez Paradox: The Universal Operating System
 **Author:** Tamer Pınar  
 **Core Formula:** $R = 1 + 0 + i$  

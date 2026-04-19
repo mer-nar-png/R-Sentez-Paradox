@@ -195,3 +195,139 @@ if __name__ == "__main__":
     threading.Thread(target=sentez_loop, daemon=True).start()
     print("\n[MÜHÜRLENDİ] TAMER PINAR - R-Sentez Sistemi Aktif: http://localhost:5000")
     app.run(host='0.0.0.0', port=5000, threaded=True)
+
+
+    import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import time
+import threading
+import json
+from fastapi import FastAPI
+import uvicorn
+from datetime import datetime
+
+# ============================================================
+# R-SENTEZ MANIFESTO METADATA & IDENTITY
+# ============================================================
+SYSTEM_OWNER = "Tamer Pınar"
+OWNER_DOB = "24/02/1967"
+MANIFESTO_DATE = "19/04/2026"
+VERSION = "RAI_V_FINAL (Full Synthesis)"
+
+# ============================================================
+# CORE ARCHITECTURE: RAI_V8 - WILLPOWER SYNTHESIS
+# ============================================================
+class RSentezCore(nn.Module):
+    def __init__(self, input_dim=10, n_agents=4):
+        super().__init__()
+        self.agents = nn.ModuleList([
+            nn.Linear(input_dim, 1) for _ in range(n_agents)
+        ])
+        
+        # Öğrenilebilir İrade (Alpha Parametresi)
+        self.will_power = nn.Parameter(torch.ones(n_agents) * 0.5)
+        
+        # Öngörü Modülü: Rezonansın Meyvesi (LSTM)
+        self.lstm = nn.LSTM(input_size=1, hidden_size=16, batch_first=True)
+        self.proj = nn.Linear(16, 1)
+        self.history = []
+
+    def forward(self, x):
+        outs, scores = [], []
+        x_sum = x.sum(dim=1, keepdim=True)
+
+        for i, agent in enumerate(self.agents):
+            o = agent(x)
+            # Rezonans ölçümü (Cosine Similarity)
+            res = F.cosine_similarity(o, x_sum, dim=0)
+            # İrade ile modüle edilmiş skor
+            score = res * torch.sigmoid(self.will_power[i])
+            outs.append(o)
+            scores.append(score)
+
+        # Faz Kilitleme (Softmax Selection)
+        weights = torch.softmax(torch.stack(scores), dim=0)
+        output = sum(w * o for w, o in zip(weights, outs))
+        return output, weights
+
+    def predict_future(self, weights):
+        # Hafızayı Koru: Rezonans kalitesini CPU scalar olarak sakla
+        val = torch.max(weights).detach().cpu().view(1, 1)
+        self.history.append(val)
+
+        if len(self.history) > 10:
+            seq = torch.stack(self.history[-10:], dim=1) # (1, 10, 1)
+            _, (h, _) = self.lstm(seq)
+            return self.proj(h[-1])
+        return torch.tensor([[0.0]])
+
+# ============================================================
+# AUTONOMOUS OS: SELF-SUPERVISED TRAINING
+# ============================================================
+class RSentezOS:
+    def __init__(self):
+        self.model = RSentezCore()
+        self.opt = torch.optim.Adam(self.model.parameters(), lr=1e-3)
+
+    def step(self, x, y):
+        out, w = self.model(x)
+        future = self.model.predict_future(w)
+        target = y.sum(dim=1, keepdim=True)
+
+        # Kayıp Fonksiyonu: MSE + Faz Entropisi
+        loss = F.mse_loss(out + 0.1 * future, target)
+        entropy = -(w * torch.log(w + 1e-8)).sum()
+        total = loss + 0.01 * entropy
+
+        self.opt.zero_grad()
+        total.backward()
+        self.opt.step()
+        return total.item(), w.detach()
+
+    def get_wisdom_report(self, w):
+        wp_avg = self.model.will_power.mean().item()
+        return {
+            "sistem_kimligi": {
+                "sahibi": SYSTEM_OWNER,
+                "dogum_tarihi": OWNER_DOB,
+                "manifesto_tarihi": MANIFESTO_DATE,
+                "versiyon": VERSION
+            },
+            "rezonans_analizi": {
+                "alpha_gucu": float(torch.max(w)),
+                "faz_durumu": "Stabil (Disiplin)" if wp_avg > 0.8 else "Dinamik (Esneklik)",
+                "mesaj": "Kaosla disiplin dengelendi." if wp_avg > 0.8 else "Evrensel rezonans akışta."
+            }
+        }
+
+# ============================================================
+# DEPLOYMENT & HEARTBEAT
+# ============================================================
+app = FastAPI()
+OS = RSentezOS()
+
+@app.get("/status")
+def status():
+    # Anlık veri sentezi simülasyonu
+    x, y = torch.randn(1, 10), torch.randn(1, 10)
+    loss, w = OS.step(x, y)
+    return {
+        "loss": f"{loss:.8f}",
+        "wisdom": OS.get_wisdom_report(w)
+    }
+
+def heartbeat():
+    print(f"\n🌀 R-SENTEZ OS BAŞLATILDI")
+    print(f"👤 SAHİBİ: {SYSTEM_OWNER} ({OWNER_DOB})")
+    print(f"📅 TARİH: {MANIFESTO_DATE}\n")
+    while True:
+        x, y = torch.randn(1, 10), torch.randn(1, 10)
+        OS.step(x, y)
+        time.sleep(5) # 5 saniyelik asenkron salınım
+
+if __name__ == "__main__":
+    # Otonom döngüyü arka planda başlat
+    threading.Thread(target=heartbeat, daemon=True).start()
+    # API Sunucusunu çalıştır
+    uvicorn.run(app, host="0.0.0.0", port=8000)

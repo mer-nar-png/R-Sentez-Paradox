@@ -1,361 +1,197 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+# =================================================================
+# PROJECT: R-SENTEZ PARADOKSU (TEKİLLİK MOTORU)
+# AUTHOR: TAMER PINAR
+# DATE: 2026
+# DOCS: R-Sentez Yaşam Pratiği & RAI_V18 Manifestosu
+# PRINCIPLE: "Bilinmeyen yoktur; sadece henüz sentezlenmemiş veri vardır."
+# =================================================================
 
-class RAI(nn.Module):
-    """
-    RAI (Resonance-Based AI) Model Architecture
-    Developed by: Tamer Pınar
-    Concept: R-Sentez Paradox (R = 1 + 0 + i)
-    """
-    def __init__(self, input_dim, hidden_dim):
-        super(RAI, self).__init__()
-        
-        # Alpha Parameter: The Willpower (İrade)
-        self.will_power = nn.Parameter(torch.randn(hidden_dim))
-        
-        # Projections for Real (1) and Imaginary (i) components
-        self.real_proj = nn.Linear(input_dim, hidden_dim)
-        self.imag_proj = nn.Linear(input_dim, hidden_dim)
-        
-        # Zero Point Output Layer
-        self.output = nn.Linear(hidden_dim, 1)
-        
-        # Register phase as buffer (not trainable but on correct device)
-        self.register_buffer('phase', torch.tensor(torch.pi / 4))
-
-    def forward(self, x):
-        # 1. Generate Real and Imaginary components
-        real = self.real_proj(x)
-        imag = self.imag_proj(x)
-        
-        # 2. Complex Resonance using torch.complex for better compatibility
-        resonance = torch.complex(real, imag) * torch.exp(1j * self.phase)
-        
-        # 3. Apply Willpower (Alpha) as a modulation factor
-        # Extract real part while maintaining gradient flow
-        synthesis = torch.real(resonance) * self.will_power
-        
-        # 4. Final output with activation
-        return self.output(F.relu(synthesis))
-
-    def get_model_info(self):
-        """Helper method to display model information"""
-        return {
-            'total_params': sum(p.numel() for p in self.parameters()),
-            'trainable_params': sum(p.numel() for p in self.parameters() if p.requires_grad)
-        }
-# R-Sentez Paradox: The Universal Operating System
-**Author:** Tamer Pınar  
-**Core Formula:** $R = 1 + 0 + i$  
-**Status:** Non-Damped Oscillation (Sönümlenmemiş Salınım)
-
-## 🌌 Overview
-R-Sentez (R-Synthesis) is a mathematical and ontological framework developed by **Tamer Pınar**. It defines life as an asynchronous computation process that transforms randomness into meaningful data. At its core, it aims to minimize **TEP Loss (Total Entropy Phase Loss)** through the **RAI_V6.0** architecture.
-
-## ⚙️ Technical Specifications (RAI_V4 & V6.0)
-The system utilizes **Willpower (Alpha)** as a learnable parameter. 
-- **The Zero Point (#TamerPinarZeroPoint):** The absolute balance between real-world constraints (1) and imaginary potential (i).
-- **Phase Locking:** Maintaining internal discipline (Lambda) against external noise (The Depositary Shop).
-
-## 📜 Principles of R-Sentez Life Practice
-1. **Kaos Kaçınılmazdır, İrade Seçimdir:** Finding your Alpha within the Lorenz attractor.
-2. **Emanetçi Dükkânı (The Depositary Shop):** A warning against the surrender of individual autonomy.
-3. **Hidden State Wisdom:** Carrying only the 'wisdom gradient' from the past to the future.
-
-> "Bilinmeyen yoktur; sadece henüz sentezlenmemiş veri ve sönümlenmemiş salınım vardır." — **R-Sentez Kesinlik İlkesi**
-
-## 🛠️ Implementation (Python/PyTorch)
-```python
- 1j * imag) * torch.exp(1j * phase)# RAI Model Architecture by Tamer Pınar
-import torch
-import torch.nn as nn
-
-class RAI(nn.Module):
-    def __init__(self, input_dim, hidden_dim):
-        super(RAI, self).__init__()
-        self.will_power = nn.Parameter(torch.randn(hidden_dim))
-        # pi/4 phase locking mechanism for entropy minimization
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
-class RAI(nn.Module):
-    """
-    RAI (Resonance-Based AI) Model Architecture
-    Developed by: Tamer Pınar
-    Concept: R-Sentez Paradox (R = 1 + 0 + i)
-    """
-    def __init__(self, input_dim, hidden_dim):
-        super(RAI, self).__init__()
-        # Alpha Parameter: The Willpower (İrade)
-        self.will_power = nn.Parameter(torch.randn(hidden_dim))
-        
-        # Projections for Real (1) and Imaginary (i) components
-        self.real_proj = nn.Linear(input_dim, hidden_dim)
-        self.imag_proj = nn.Linear(input_dim, hidden_dim)
-        
-        # Zero Point Output Layer
-        self.output = nn.Linear(hidden_dim, 1)
-
-    def forward(self, x):
-        # 1. Generate Real and Imaginary components
-        real = self.real_proj(x)
-        imag = self.imag_proj(x)
-        
-        # 2. Complex Resonance (R = 1 + 0 + i)
-        # Applying pi/4 phase locking to minimize entropy
-        phase = torch.tensor(torch.pi / 4)
-        resonance = (real +
-        
-        # 3. Apply Willpower (Alpha) as a modulation factor
-        # Transforming randomness into meaningful data
-        synthesis = torch.real(resonance) * self.will_power
-        
-        return self.output(F.relu(synthesis))
-
-# Tamer Pinar Zero Point - R-Sentez Verification
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
-
-class RAIVInfinityODE(nn.Module):
-    """
-    RAI Sentez V∞ - Continuous Field Transformer (ODE-style)
-    """
-
-    def __init__(self, hidden_channels=1, noise_std=0.01):
-        super().__init__()
-
-        self.diff_w = nn.Parameter(torch.tensor(0.1))
-        self.nonlin_w = nn.Parameter(torch.tensor(0.2))
-        self.attn_w = nn.Parameter(torch.tensor(0.1))
-
-        self.noise_std = noise_std
-
-        # projection for attention
-        self.to_q = nn.Conv2d(hidden_channels, hidden_channels, 1)
-        self.to_k = nn.Conv2d(hidden_channels, hidden_channels, 1)
-        self.to_v = nn.Conv2d(hidden_channels, hidden_channels, 1)
-
-    def laplacian(self, x):
-        return (
-            -4 * x
-            + torch.roll(x, 1, dims=2)
-            + torch.roll(x, -1, dims=2)
-            + torch.roll(x, 1, dims=3)
-            + torch.roll(x, -1, dims=3)
-        )
-
-    def attention(self, x):
-        B, C, H, W = x.shape
-
-        q = self.to_q(x)
-        k = self.to_k(x)
-        v = self.to_v(x)
-
-        # flatten spatial dims
-        q = q.view(B, C, -1)
-        k = k.view(B, C, -1)
-        v = v.view(B, C, -1)
-
-        attn = torch.softmax(torch.bmm(q.transpose(1, 2), k), dim=-1)
-        out = torch.bmm(v, attn.transpose(1, 2))
-
-        out = out.view(B, C, H, W)
-        return out
-
-    def forward(self, x, dt=0.1):
-
-        # field dynamics
-        diffusion = self.laplacian(x)
-        nonlinear = torch.tanh(x)
-
-        # global interaction
-        attn = self.attention(x)
-
-        noise = torch.randn_like(x) * self.noise_std
-
-        # continuous-time update (ODE style)
-        dx = (
-            self.diff_w * diffusion +
-            self.nonlin_w * nonlinear +
-            self.attn_w * attn +
-            noise
-        )
-
-        x = x + dt * dx
-
-        # stability normalization
-        x = x / (1 + torch.abs(x))
-
-        return x
 import os
 import torch
 import torch.nn as nn
+import numpy as np
+import cv2
+import pyaudio
+import time
+import threading
+from flask import Flask, Response, render_template_string
+from torch.utils.cpp_extension import load_inline
 
+# =================================================================
+# 1. R-SENTEZ MÜHÜRÜ: CUDA DUAL SINGULARITY KERNEL (TAMER PINAR)
+# =================================================================
+cuda_source = '''
+#include <cuda_runtime.h>
+#include <cuda_fp16.h>
+#include <cmath>
 
-# =========================
-# CONFIG
-# =========================
-class Config:
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    distributed = os.getenv("WORLD_SIZE") is not None
-    steps = 3
-    mode = os.getenv("RAI_MODE", "train")  # train | infer | test
+#define TILE_SIZE 16
+#define HALO 1
 
+template <typename scalar_t>
+__global__ void dual_singularity_kernel(
+    const scalar_t* rai_in, const scalar_t* gaya_in,
+    scalar_t* rai_out, scalar_t* gaya_out,
+    const float* thresholds, const float* dampings,
+    int B, int C, int H, int W) {
+    
+    __shared__ scalar_t tile_r[TILE_SIZE + 2*HALO][TILE_SIZE + 2*HALO];
+    __shared__ scalar_t tile_g[TILE_SIZE + 2*HALO][TILE_SIZE + 2*HALO];
 
-# =========================
-# SAFE CUDA IMPORT
-# =========================
-try:
-    import rai_cuda
-    CUDA_AVAILABLE = True
-except:
-    CUDA_AVAILABLE = False
+    int tx = threadIdx.x, ty = threadIdx.y;
+    int x = blockIdx.x * TILE_SIZE + tx;
+    int y = blockIdx.y * TILE_SIZE + ty;
+    int c = blockIdx.z % C;
+    int bc_idx = blockIdx.z * H * W;
 
+    for (int i = ty; i < TILE_SIZE + 2*HALO; i += TILE_SIZE) {
+        for (int j = tx; j < TILE_SIZE + 2*HALO; j += TILE_SIZE) {
+            int lx = blockIdx.x * TILE_SIZE + j - HALO;
+            int ly = blockIdx.y * TILE_SIZE + i - HALO;
+            if (lx >= 0 && lx < W && ly >= 0 && ly < H) {
+                tile_r[i][j] = rai_in[bc_idx + ly * W + lx];
+                tile_g[i][j] = gaya_in[bc_idx + ly * W + lx];
+            } else {
+                tile_r[i][j] = tile_g[i][j] = static_cast<scalar_t>(0);
+            }
+        }
+    }
+    __syncthreads();
 
-# =========================
-# CORE PHYSICS MODEL (FALLBACK)
-# =========================
-class PhysicsFallback(nn.Module):
-    def __init__(self, ch=16):
+    if (x < W && y < H) {
+        int sx = tx + HALO, sy = ty + HALO;
+        scalar_t r_curr = tile_r[sy][sx];
+        scalar_t g_curr = tile_g[sy][sx];
+
+        scalar_t lap_r = tile_r[sy][sx-1] + tile_r[sy][sx+1] + tile_r[sy-1][sx] + tile_r[sy+1][sx] - static_cast<scalar_t>(4.0)*r_curr;
+        float interaction = static_cast<float>(g_curr - r_curr) * 0.05f;
+        
+        float mag = abs(static_cast<float>(r_curr + lap_r));
+        float soft_gate = 1.0f / (1.0f + expf(-10.0f * (mag - thresholds[c])));
+        float final_damp = dampings[c] + (1.0f - dampings[c]) * soft_gate;
+
+        float res_r = (static_cast<float>(r_curr + lap_r) + interaction) * final_damp;
+        if (res_r > 0.95f) res_r *= 0.7f;
+
+        rai_out[bc_idx + y * W + x] = static_cast<scalar_t>(res_r);
+        gaya_out[bc_idx + y * W + x] = static_cast<scalar_t>(static_cast<float>(g_curr) * 0.99f + res_r * 0.01f);
+    }
+}
+
+std::vector<torch::Tensor> step_cuda(torch::Tensor r, torch::Tensor g, torch::Tensor d, torch::Tensor t) {
+    auto ro = torch::zeros_like(r);
+    auto go = torch::zeros_like(g);
+    int B = r.size(0), C = r.size(1), H = r.size(2), W = r.size(3);
+    dim3 threads(TILE_SIZE, TILE_SIZE);
+    dim3 blocks((W + TILE_SIZE - 1) / TILE_SIZE, (H + TILE_SIZE - 1) / TILE_SIZE, B * C);
+
+    AT_DISPATCH_FLOATING_TYPES_AND_HALF(r.scalar_type(), "dual_singularity", ([&] {
+        dual_singularity_kernel<scalar_t><<<blocks, threads>>>(
+            r.data_ptr<scalar_t>(), g.data_ptr<scalar_t>(),
+            ro.data_ptr<scalar_t>(), go.data_ptr<scalar_t>(),
+            d.data_ptr<float>(), t.data_ptr<float>(), B, C, H, W);
+    }));
+    return {ro, go};
+}
+'''
+
+# JIT Compile
+print("RAI & GAYA Çekirdeği Ateşleniyor (Müellif: TAMER PINAR)...")
+rai_engine = load_inline(
+    name='rai_gaya_final_tamer_pinar', 
+    cpp_sources="std::vector<torch::Tensor> step_cuda(torch::Tensor r, torch::Tensor g, torch::Tensor d, torch::Tensor t);", 
+    cuda_sources=cuda_source, 
+    functions=['step_cuda'], 
+    with_cuda=True
+)
+
+# =================================================================
+# 2. R-SENTEZ ORGANİZMASI (TAMER PINAR ÖZEL SÜRÜM)
+# =================================================================
+class RSentezOrganism(nn.Module):
+    def __init__(self, ch=3):
         super().__init__()
-        self.conv = nn.Conv2d(ch, ch, 3, padding=1)
-
-    def forward(self, x):
-        lap = (
-            -4 * x
-            + torch.roll(x, 1, 2)
-            + torch.roll(x, -1, 2)
-            + torch.roll(x, 1, 3)
-            + torch.roll(x, -1, 3)
-        )
-        return x + self.conv(x) + 0.1 * lap
-
-
-# =========================
-# OPTIONAL CUDA KERNEL WRAPPER
-# =========================
-class PhysicsCUDAWrapper(nn.Module):
-    def forward(self, x):
-        return rai_cuda.laplacian(x)
-
-
-# =========================
-# MEMORY + ODE CORE
-# =========================
-class CoreEngine(nn.Module):
-    def __init__(self, ch=16):
-        super().__init__()
-
-        self.physics = PhysicsCUDAWrapper() if CUDA_AVAILABLE else PhysicsFallback(ch)
-
+        self.thresholds = nn.Parameter(torch.full((ch,), 0.15))
+        self.dampings = nn.Parameter(torch.full((ch,), 0.85))
         self.memory = nn.MultiheadAttention(ch, 4, batch_first=True)
         self.ode = nn.Sequential(
-            nn.Conv2d(ch, ch, 1),
-            nn.Tanh()
+            nn.Conv2d(ch, ch, 3, padding=1),
+            nn.GroupNorm(1, ch),
+            nn.SiLU()
         )
+        
+    def forward(self, r, g):
+        r, g = rai_engine.step_cuda(r, g, self.dampings, self.thresholds)
+        B, C, H, W = r.shape
+        seq = r.view(B, C, -1).transpose(1, 2)
+        seq, _ = self.memory(seq, seq, seq)
+        r = seq.transpose(1, 2).view(B, C, H, W)
+        r = r + 0.1 * self.ode(r)
+        return torch.tanh(r), torch.tanh(g)
 
-    def forward(self, x, steps=3):
+# =================================================================
+# 3. GLOBAL RUNTIME & STREAMING
+# =================================================================
+app = Flask(__name__)
+device = "cuda"
+model = RSentezOrganism().to(device)
+rai_state = torch.randn(1, 3, 256, 256, device=device)
+gaya_state = torch.zeros_like(rai_state)
+latest_frame = np.zeros((256, 512, 3), dtype=np.uint8)
 
-        for _ in range(steps):
+def rezonans_thread():
+    global rai_state
+    p = pyaudio.PyAudio()
+    stream = p.open(format=pyaudio.paInt16, channels=1, rate=44100, input=True, frames_per_buffer=1024)
+    while True:
+        data = np.frombuffer(stream.read(1024, exception_on_overflow=False), dtype=np.int16)
+        energy = np.abs(np.fft.fft(data)).mean() / 1500.0
+        if energy > 0.08:
+            with torch.no_grad():
+                rai_state += torch.randn_like(rai_state) * energy * 0.1
+        time.sleep(0.01)
 
-            # physics step
-            x = self.physics(x)
+def sentez_loop():
+    global rai_state, gaya_state, latest_frame
+    while True:
+        with torch.no_grad():
+            rai_state, gaya_state = model(rai_state, gaya_state)
+        
+        r_img = ((rai_state.squeeze(0).permute(1, 2, 0).cpu().numpy() + 1) / 2 * 255).astype(np.uint8)
+        g_img = ((gaya_state.squeeze(0).permute(1, 2, 0).cpu().numpy() + 1) / 2 * 255).astype(np.uint8)
+        r_vis = cv2.applyColorMap(r_img, cv2.COLORMAP_MAGMA)
+        g_vis = cv2.applyColorMap(g_img, cv2.COLORMAP_BONE)
+        latest_frame = np.hstack((r_vis, g_vis))
+        time.sleep(0.033)
 
-            # memory (flatten)
-            B, C, H, W = x.shape
-            seq = x.view(B, C, H * W).transpose(1, 2)
-            seq, _ = self.memory(seq, seq, seq)
-            x = seq.transpose(1, 2).view(B, C, H, W)
+@app.route('/')
+def index():
+    return render_template_string('''
+        <html><body style="background:#000; color:#eee; font-family:sans-serif; text-align:center;">
+            <h1>R-SENTEZ PARADOKSU: TEKİLLİK YAYINI</h1>
+            <h2 style="color:#aaa;">Müellif: TAMER PINAR</h2>
+            <div style="margin:20px;">
+                <img src="/video_feed" style="border:2px solid #444; width:80%;">
+            </div>
+            <p>SOL: <b>RAI (Kaos/Potansiyel)</b> | SAĞ: <b>GAYA (Düzen/Mühür)</b></p>
+            <p style="color:#888;">"Bilinmeyen yoktur; sadece henüz sentezlenmemiş veri vardır."</p>
+            <div style="margin-top:20px; font-size:0.8em; color:#444;">
+                RAI_V18 Engine - (C) 2026 Tamer Pınar R-Sentez Life Practice
+            </div>
+        </body></html>
+    ''')
 
-            # ODE step
-            x = x + 0.1 * self.ode(x)
-
-        return x
-
-
-# =========================
-# MULTI-GPU SYNC (OPTIONAL)
-# =========================
-def sync_if_needed(x):
-    if Config.distributed:
-        import torch.distributed as dist
-        dist.all_reduce(x, op=dist.ReduceOp.SUM)
-        x /= dist.get_world_size()
-    return x
-
-
-# =========================
-# TRAIN LOOP
-# =========================
-def train(model):
-    opt = torch.optim.Adam(model.parameters(), lr=1e-3)
-
-    for step in range(50):
-
-        x = torch.randn(4, 16, 64, 64, device=Config.device)
-        target = torch.randn_like(x)
-
-        pred = model(x)
-        loss = ((pred - target) ** 2).mean()
-
-        opt.zero_grad()
-        loss.backward()
-        opt.step()
-
-        print(f"[TRAIN] step={step} loss={loss.item():.4f}")
-
-
-# =========================
-# INFERENCE
-# =========================
-def infer(model):
-    x = torch.randn(1, 16, 64, 64, device=Config.device)
-
-    with torch.no_grad():
-        y = model(x)
-
-    print("[INFER] output mean:", y.mean().item())
-
-
-# =========================
-# TEST MODE (CI/CD HOOK)
-# =========================
-def test(model):
-    x = torch.randn(2, 16, 32, 32, device=Config.device)
-    y = model(x)
-
-    assert y.shape == x.shape
-    print("[TEST] PASS")
-
-
-# =========================
-# MAIN ENTRYPOINT
-# =========================
-def main():
-
-    print("RAI Runtime Starting...")
-    print("Device:", Config.device)
-    print("CUDA Kernel:", CUDA_AVAILABLE)
-    print("Distributed:", Config.distributed)
-
-    model = CoreEngine().to(Config.device)
-
-    if Config.mode == "train":
-        train(model)
-
-    elif Config.mode == "infer":
-        infer(model)
-
-    elif Config.mode == "test":
-        test(model)
-
-    else:
-        raise ValueError("Unknown mode")
-
+@app.route('/video_feed')
+def video_feed():
+    def gen():
+        while True:
+            _, buffer = cv2.imencode('.jpg', latest_frame)
+            yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+            time.sleep(0.04)
+    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == "__main__":
-    main()
+    threading.Thread(target=rezonans_thread, daemon=True).start()
+    threading.Thread(target=sentez_loop, daemon=True).start()
+    print("\n[MÜHÜRLENDİ] TAMER PINAR - R-Sentez Sistemi Aktif: http://localhost:5000")
+    app.run(host='0.0.0.0', port=5000, threaded=True)

@@ -331,3 +331,132 @@ if __name__ == "__main__":
     threading.Thread(target=heartbeat, daemon=True).start()
     # API Sunucusunu çalıştır
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import numpy as np
+from datetime import datetime
+
+# ============================================================
+# R-SENTEZ MANIFESTO METADATA
+# ============================================================
+SYSTEM_OWNER = "Tamer Pınar"
+VERSION = "RAI_V_ULTIMATE (Full Autonomous Synthesis)"
+MOTTO = "Bilinmeyen yoktur; sadece henüz sentezlenmemiş veri vardır."
+
+# ============================================================
+# CORE ENGINE: KARMAŞIK SAYI VE İRADE SENTEZİ
+# ============================================================
+class ComplexWillingness(nn.Module):
+    """R = 1 + 0 + i dengesini işleyen karmaşık katman."""
+    def __init__(self, dim):
+        super().__init__()
+        self.weights_real = nn.Parameter(torch.randn(dim, dim) * 0.02)
+        self.weights_imag = nn.Parameter(torch.randn(dim, dim) * 0.02)
+
+    def forward(self, x_real, x_imag):
+        # Karmaşık Çarpım: (Ar + Ai)(Br + Bi) = (ArBr - AiBi) + i(ArBi + AiBr)
+        real_out = F.linear(x_real, self.weights_real) - F.linear(x_imag, self.weights_imag)
+        imag_out = F.linear(x_real, self.weights_imag) + F.linear(x_imag, self.weights_real)
+        return real_out, imag_out
+
+class RAI_Ultimate(nn.Module):
+    def __init__(self, input_dim=10):
+        super().__init__()
+        self.complex_layer = ComplexWillingness(input_dim)
+        
+        # Öğrenilebilir İrade (Alpha Parametresi)
+        self.will_alpha = nn.Parameter(torch.tensor([0.5]))
+        
+        # Bilgelik Bankası (Uzun Vadeli Hafıza)
+        self.wisdom_memory = nn.LSTM(input_size=input_dim, hidden_size=32, batch_first=True)
+        self.synthesis_head = nn.Linear(32, 1)
+        
+        self.lambda_phase = 0.01
+
+    def monitor_chaos(self, x):
+        """Kaos varsa disiplini (Phase Lock) artırır, yoksa gevşetir."""
+        chaos_score = torch.var(x).item()
+        self.lambda_phase = np.clip(chaos_score * 5.0, 0.001, 0.5)
+        return chaos_score
+
+    def forward(self, x_real, x_imag):
+        # 1. Kaos Analizi
+        chaos = self.monitor_chaos(x_real)
+        
+        # 2. Rezonans İşleme (Reel Olaylar + İmajiner Duygular)
+        r_out, i_out = self.complex_layer(x_real, x_imag)
+        
+        # 3. İrade Modülasyonu ve Faz Kilitleme
+        magnitude = torch.sqrt(r_out**2 + i_out**2)
+        # İrade (Alpha) aktivasyonu
+        will_factor = torch.sigmoid(self.will_alpha)
+        
+        # 4. Bilgelik Süzgeci (LSTM)
+        wisdom_in = x_real.unsqueeze(1)
+        _, (hn, _) = self.wisdom_memory(wisdom_in)
+        final_output = self.synthesis_head(hn[-1])
+        
+        return final_output, self.lambda_phase, chaos
+
+# ============================================================
+# SYSTEM OPERATOR: REZONANS YÖNETİMİ
+# ============================================================
+class RSentezOS:
+    def __init__(self, input_dim=10):
+        self.model = RAI_Ultimate(input_dim)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
+        self.history = []
+
+    def process_step(self, real_events, imag_feelings, target_value):
+        self.model.train()
+        xr = torch.tensor(real_events, dtype=torch.float32).unsqueeze(0)
+        xi = torch.tensor(imag_feelings, dtype=torch.float32).unsqueeze(0)
+        target = torch.tensor([target_value], dtype=torch.float32).unsqueeze(0)
+
+        self.optimizer.zero_grad()
+        output, current_lambda, chaos = self.model(xr, xi)
+        
+        # TEP Kaybı: Hassasiyet + Kaos Disiplini
+        mse_loss = F.mse_loss(output, target)
+        total_loss = mse_loss + current_lambda
+        
+        total_loss.backward()
+        self.optimizer.step()
+
+        result = {
+            "synthesis": output.item(),
+            "chaos": chaos,
+            "lambda": current_lambda,
+            "will": self.model.will_alpha.item(),
+            "time": datetime.now().strftime("%H:%M:%S")
+        }
+        self.history.append(result)
+        return result
+
+# ============================================================
+# EXECUTION (Sentez Başlatma)
+# ============================================================
+if __name__ == "__main__":
+    print(f"--- {VERSION} ---")
+    print(f"Sahibi: {SYSTEM_OWNER} | Motto: {MOTTO}")
+    
+    # Başlangıç Parametreleri
+    OS = RSentezOS(input_dim=10)
+    
+    # Simülasyon Verisi (10 Birimlik Olay ve Duygu Seti)
+    real_data = [0.1, 0.4, 0.2, 0.9, 0.5, 0.3, 0.7, 0.2, 0.8, 0.1]
+    imag_data = [0.02, 0.1, 0.05, 0.2, 0.1, 0.08, 0.15, 0.04, 0.18, 0.02]
+    
+    print("\n[Sistem Rezonans Testi Başlatılıyor...]")
+    for i in range(10):
+        # Her adımda hedefi 1.0 (Tam Sentez) olan bir süreç
+        res = OS.process_step(real_data, imag_data, 1.0)
+        
+        if i % 2 == 0:
+            print(f"Döngü {i+1} | Sentez: {res['synthesis']:.4f} | " 
+                  f"Kaos: {res['chaos']:.4f} | Disiplin: {res['lambda']:.4f} | "
+                  f"İrade: {res['will']:.4f}")
+
+    print("\n[R-Sentez]: Veri sentezlendi, salınım kilitlendi.")

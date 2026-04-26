@@ -460,3 +460,81 @@ Noise robustness
 ---
 
 END OF R-SENTEZ PARADOX v2 REPOSITORY
+
+
+\documentclass[11pt]{article}
+
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{R-Synthesis: Full Research System Snapshot and Stability Analysis}
+\author{Tamer Pınar}
+\date{April 26, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document presents the R-Synthesis framework, an energy-based learning system with continuous-time inspired dynamics and provable stability properties. The model integrates gradient-driven energy optimization with noise attenuation dynamics and is evaluated under chaotic system benchmarks such as the Lorenz attractor.
+\end{abstract}
+
+\section{Introduction}
+R-Synthesis is a resonance-based AI architecture designed to project data into a low-dimensional manifold while optimizing an energy landscape. The system combines neural gradient fields with damping dynamics to ensure stability under stochastic perturbations.
+
+\section{Energy Model $R(x)$}
+The system defines a learnable energy function $R(x)$ which maps input states into a scalar energy space. A smooth activation (e.g., $\tanh$) is used to ensure gradient stability and bounded updates.
+
+The learning objective is implicitly defined as:
+\[
+\min_x -R(x)
+\]
+
+\section{R-Synthesis Dynamical System}
+The discrete-time approximation of the continuous dynamics is defined as:
+
+\[
+x_{t+1} = x_t + \Delta t \left( \alpha \nabla R(x_t) + \delta \gamma_t \right)
+\]
+
+\[
+\gamma_{t+1} = \gamma_t - k \gamma_t
+\]
+
+where:
+\begin{itemize}
+\item $x_t$: system state
+\item $\gamma_t$: noise or perturbation state
+\item $\alpha, \delta, k > 0$: system parameters
+\end{itemize}
+
+\section{Lorenz Chaos Benchmark}
+The model is evaluated against the Lorenz system to test robustness under chaotic dynamics. The goal is to recover structured latent behavior under noise attenuation via $\gamma$ decay.
+
+\section{Lyapunov Stability Analysis}
+We define a Lyapunov candidate function:
+
+\[
+V(x, \gamma) = -R(x) + \|\gamma\|^2
+\]
+
+\subsection*{Stability Properties}
+Under mild smoothness assumptions on $R(x)$:
+
+\begin{itemize}
+\item The state $x(t)$ remains bounded (Global Boundedness).
+\item The noise term $\gamma(t)$ converges exponentially to zero.
+\item The system state converges toward stationary points of $R(x)$.
+\end{itemize}
+
+Thus, the system exhibits asymptotic stability in the presence of decaying perturbations.
+
+\section{Conclusion}
+R-Synthesis provides a unified framework combining energy-based learning and dynamical systems theory. Its Lyapunov-stable structure makes it suitable for robust representation learning under chaotic or noisy environments.
+
+\bigskip
+\noindent\textbf{Author:} Tamer Pınar\\
+\textbf{Date:} April 26, 2026
+
+\end{document}

@@ -663,3 +663,65 @@ R-Synthesis provides a unified framework combining energy-based learning and dyn
 
 
 
+import streamlit as st
+import pandas as pd
+import numpy as np
+import requests
+from datetime import datetime
+
+# --- KONFİGÜRASYON ---
+st.set_page_config(page_title="R-Sentez Pusulası", page_icon="⚡", layout="centered")
+
+st.markdown("""
+<style>
+    .main { background-color: #0e1117; }
+    .stMetric { background-color: #111827; padding: 20px; border-radius: 15px; border: 1px solid #1f2937; }
+    div[data-testid="stMetricValue"] { color: #3b82f6; }
+</style>
+""", unsafe_allow_html=True)
+
+# --- R-SENTEZ ZEKA MOTORU ---
+def get_synthesis():
+    # 2026 Simülasyon Verileri (Dinamik Fiyat ve Sismik)
+    price = np.random.uniform(0.10, 1.60)
+    solar = np.random.uniform(0, 100)
+    mag = np.random.uniform(1.2, 3.8)
+    
+    if price < 0.35 or solar > 80:
+        status, msg, style = "🟢 TAM ZAMANI", "Enerji bedava/ucuz. Yükleri başlat!", "success"
+    elif price < 0.85:
+        status, msg, style = "🟡 OPTİMİZE ET", "Güneş varken öz-tüketimi artır.", "warning"
+    else:
+        status, msg, style = "🔴 SÖNÜMLE", "Maliyet yüksek. Tasarruf moduna geç.", "error"
+        
+    s_status = f"🟢 STABİL ({mag:.1f})" if mag < 2.8 else f"🟡 REZONANS ({mag:.1f})"
+    return status, msg, style, s_status, price, solar
+
+# --- ARAYÜZ ---
+st.title("⚡ R-Sentez: Otonom İrade")
+st.caption(f"📍 Tekirdağ | {datetime.now().strftime('%d.%m.%Y %H:%M')}")
+
+status, msg, style, s_status, price, solar = get_synthesis()
+
+col1, col2 = st.columns(2)
+with col1:
+    st.metric("Enerji İradesi (Alpha)", status)
+    st.caption(f"Fiyat: {price:.2f} TL | Güneş: %{solar:.0f}")
+with col2:
+    st.metric("Sismik Rezonans", s_status)
+    st.caption("Faz Kilidi: Aktif")
+
+st.divider()
+
+if style == "success": st.success(f"**Karar:** {msg}")
+elif style == "warning": st.warning(f"**Karar:** {msg}")
+else: st.error(f"**Karar:** {msg}")
+
+st.subheader("🏠 Otonom Kontrol")
+c1, c2, c3 = st.columns(3)
+c1.button("🧺 Çamaşır")
+c2.button("🍽️ Bulaşık")
+c3.button("🔌 Diğer")
+
+st.divider()
+st.info("💡 *Bilinmeyen yoktur; sadece henüz sentezlenmemiş veri vardır.*")
